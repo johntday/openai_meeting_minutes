@@ -6,6 +6,7 @@ https://platform.openai.com/docs/tutorials/meeting-minutes
 
 ## Install
 ```bash
+# checkout code
 git clone https://github.com/johntday/openai_meeting_minutes.git
 
 cd openai_meeting_minutes/

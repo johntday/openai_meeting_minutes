@@ -1,9 +1,13 @@
+import os
+
 import openai
 from docx import Document
 import time
+from dotenv import load_dotenv
 
+load_dotenv()
 
-openai.api_key = "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"
+openai.api_key = os.getenv('OPENAI_API_KEY')
 
 
 # ---------- Transcription --------------------
