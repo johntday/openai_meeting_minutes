@@ -8,6 +8,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 openai.api_key = os.getenv('OPENAI_API_KEY')
+model = "gpt-4"
+temperature = 0
 
 
 # ---------- Transcription --------------------
@@ -20,14 +22,16 @@ def transcribe_audio(audio_file_path):
 
 # ---------- Abstract Summary --------------------
 
-def full_abstract_summary_extraction(transcription, meeting_description=None):
+def full_abstract_summary_extraction(transcription,
+                                     meeting_description=None
+                                     ):
     system_prompt = ("You are a highly skilled AI trained in language comprehension and summarization. " +
                      (f"This is a meeting about {meeting_description}. " if meeting_description else "") +
                      f"I would like you to read the following text and summarize it into a concise abstract paragraph. Aim to retain the most important points, providing a coherent and readable summary that could help a person understand the main points of the discussion without needing to read the entire text. Please avoid unnecessary details or tangential points.")
 
     response = openai.ChatCompletion.create(
-        model="gpt-4",
-        temperature=0,
+        model=model,
+        temperature=temperature,
         messages=[
             {
                 "role": "system",
@@ -42,7 +46,9 @@ def full_abstract_summary_extraction(transcription, meeting_description=None):
     return response['choices'][0]['message']['content']
 
 
-def chunked_abstract_summary_extraction(transcription, meeting_description=None):
+def chunked_abstract_summary_extraction(transcription,
+                                        meeting_description=None
+                                        ):
     max_tokens = 8000  # A bit less than 8192 to leave some room for the system message
     overlap = 1000  # Overlap size - tune this based on your use case
 
@@ -58,8 +64,8 @@ def chunked_abstract_summary_extraction(transcription, meeting_description=None)
                          f"Previously, you summarized: '{previous_summary}'. Now, I would like you to read the following text and summarize it into a concise abstract paragraph, building upon your previous summary. Aim to retain the most important points, providing a coherent and readable summary that could help a person understand the main points of the discussion without needing to read the entire text. Please avoid unnecessary details or tangential points.")
 
         response = openai.ChatCompletion.create(
-            model="gpt-4",
-            temperature=0,
+            model=model,
+            temperature=temperature,
             messages=[
                 {
                     "role": "system",
@@ -77,8 +83,8 @@ def chunked_abstract_summary_extraction(transcription, meeting_description=None)
 
     # Use GPT-4 to rephrase the final summary into a more cohesive paragraph
     response = openai.ChatCompletion.create(
-        model="gpt-4",
-        temperature=0,
+        model=model,
+        temperature=temperature,
         messages=[
             {
                 "role": "system",
@@ -96,7 +102,9 @@ def chunked_abstract_summary_extraction(transcription, meeting_description=None)
     return final_summary
 
 
-def abstract_summary_extraction(transcription, meeting_description=None):
+def abstract_summary_extraction(transcription,
+                                meeting_description=None
+                                ):
     try:
         # Try the original method first
         return full_abstract_summary_extraction(transcription, meeting_description)
@@ -122,14 +130,16 @@ def abstract_summary_extraction(transcription, meeting_description=None):
 
 # ---------- Key Points --------------------
 
-def full_key_points_extraction(transcription, meeting_description=None):
+def full_key_points_extraction(transcription,
+                               meeting_description=None
+                               ):
     system_prompt = ("You are a proficient AI with a specialty in distilling information into key points. " +
                      (f"This is a meeting about {meeting_description}. " if meeting_description else "") +
                      f"Based on the following text, identify and list the main points that were discussed or brought up. These should be the most important ideas, findings, or topics that are crucial to the essence of the discussion. Your goal is to provide a list that someone could read to quickly understand what was talked about.")
 
     response = openai.ChatCompletion.create(
-        model="gpt-4",
-        temperature=0,
+        model=model,
+        temperature=temperature,
         messages=[
             {
                 "role": "system",
@@ -144,7 +154,9 @@ def full_key_points_extraction(transcription, meeting_description=None):
     return response['choices'][0]['message']['content']
 
 
-def chunked_key_points_extraction(transcription, meeting_description=None):
+def chunked_key_points_extraction(transcription,
+                                  meeting_description=None
+                                  ):
     max_tokens = 8000  # A bit less than 8192 to leave some room for the system message
     overlap = 1000  # Overlap size - tune this based on your use case
 
@@ -160,8 +172,8 @@ def chunked_key_points_extraction(transcription, meeting_description=None):
                          f"Previously, you identified: '{previous_key_points}'. Now, based on the following text, identify and list the main points that were discussed or brought up. These should be the most important ideas, findings, or topics that are crucial to the essence of the discussion. Your goal is to provide a list that someone could read to quickly understand what was talked about.")
 
         response = openai.ChatCompletion.create(
-            model="gpt-4",
-            temperature=0,
+            model=model,
+            temperature=temperature,
             messages=[
                 {
                     "role": "system",
@@ -187,8 +199,8 @@ def chunked_key_points_extraction(transcription, meeting_description=None):
     )
 
     response = openai.ChatCompletion.create(
-        model="gpt-4",
-        temperature=0,
+        model=model,
+        temperature=temperature,
         messages=[
             {
                 "role": "system",
@@ -206,7 +218,9 @@ def chunked_key_points_extraction(transcription, meeting_description=None):
     return final_key_points
 
 
-def key_points_extraction(transcription, meeting_description=None):
+def key_points_extraction(transcription,
+                          meeting_description=None
+                          ):
     try:
         # Try the original method first
         return full_key_points_extraction(transcription, meeting_description)
@@ -232,14 +246,16 @@ def key_points_extraction(transcription, meeting_description=None):
 
 # ---------- Action Items --------------------
 
-def full_action_item_extraction(transcription, meeting_description=None):
+def full_action_item_extraction(transcription,
+                                meeting_description=None
+                                ):
     system_prompt = ("You are an AI expert in analyzing conversations and extracting action items. " +
                      (f"This is a meeting about {meeting_description}. " if meeting_description else "") +
                      f"Please review the text and identify any tasks, assignments, or actions that were agreed upon or mentioned as needing to be done. These could be tasks assigned to specific individuals, or general actions that the group has decided to take. Please list these action items clearly and concisely.")
 
     response = openai.ChatCompletion.create(
-        model="gpt-4",
-        temperature=0,
+        model=model,
+        temperature=temperature,
         messages=[
             {
                 "role": "system",
@@ -254,7 +270,9 @@ def full_action_item_extraction(transcription, meeting_description=None):
     return response['choices'][0]['message']['content']
 
 
-def chunked_action_item_extraction(transcription, meeting_description=None):
+def chunked_action_item_extraction(transcription,
+                                   meeting_description=None
+                                   ):
     max_tokens = 8000  # A bit less than 8192 to leave some room for the system message
     overlap = 1000  # Overlap size - tune this based on your use case
 
@@ -270,8 +288,8 @@ def chunked_action_item_extraction(transcription, meeting_description=None):
                          f"Previously, you identified: '{previous_action_items}'. Now, please review the text and identify any tasks, assignments, or actions that were agreed upon or mentioned as needing to be done, building upon your previous list. These could be tasks assigned to specific individuals, or general actions that the group has decided to take. Please list these action items clearly and concisely.")
 
         response = openai.ChatCompletion.create(
-            model="gpt-4",
-            temperature=0,
+            model=model,
+            temperature=temperature,
             messages=[
                 {
                     "role": "system",
@@ -289,8 +307,8 @@ def chunked_action_item_extraction(transcription, meeting_description=None):
 
     # Use GPT-4 to consolidate the action items into a single, coherent list
     response = openai.ChatCompletion.create(
-        model="gpt-4",
-        temperature=0,
+        model=model,
+        temperature=temperature,
         messages=[
             {
                 "role": "system",
@@ -308,7 +326,9 @@ def chunked_action_item_extraction(transcription, meeting_description=None):
     return final_action_items
 
 
-def action_item_extraction(transcription, meeting_description=None):
+def action_item_extraction(transcription,
+                           meeting_description=None
+                           ):
     try:
         # Try the original method first
         return full_action_item_extraction(transcription, meeting_description)
@@ -334,14 +354,16 @@ def action_item_extraction(transcription, meeting_description=None):
 
 # ---------- Sentiment Analysis --------------------
 
-def full_sentiment_analysis(transcription, meeting_description=None):
+def full_sentiment_analysis(transcription,
+                            meeting_description=None
+                            ):
     system_prompt = ("As an AI with expertise in language and emotion analysis, your task is to analyze the sentiment of the following text. " +
                      (f"This is a meeting about {meeting_description}. " if meeting_description else "") +
                      f"Please consider the overall tone of the discussion, the emotion conveyed by the language used, and the context in which words and phrases are used. Indicate whether the sentiment is generally positive, negative, or neutral, and provide brief explanations for your analysis where possible.")
 
     response = openai.ChatCompletion.create(
-        model="gpt-4",
-        temperature=0,
+        model=model,
+        temperature=temperature,
         messages=[
             {
                 "role": "system",
@@ -356,7 +378,9 @@ def full_sentiment_analysis(transcription, meeting_description=None):
     return response['choices'][0]['message']['content']
 
 
-def chunked_sentiment_analysis(transcription, meeting_description=None):
+def chunked_sentiment_analysis(transcription,
+                               meeting_description=None
+                               ):
     max_tokens = 8000  # A bit less than 8192 to leave some room for the system message
     overlap = 1000  # Overlap size - tune this based on your use case
 
@@ -368,13 +392,13 @@ def chunked_sentiment_analysis(transcription, meeting_description=None):
     for part in transcript_parts:
         # Analyze the sentiment of the chunk
         system_prompt = (
-                    "As an AI with expertise in language and emotion analysis, your task is to analyze the sentiment of the following text. " +
-                    (f"This is a meeting about {meeting_description}. " if meeting_description else "") +
-                    f"Previously, you analyzed: '{previous_sentiment}'. Now, please consider the overall tone of the discussion, the emotion conveyed by the language used, and the context in which words and phrases are used. Indicate whether the sentiment is generally positive, negative, or neutral, and provide brief explanations for your analysis where possible.")
+                "As an AI with expertise in language and emotion analysis, your task is to analyze the sentiment of the following text. " +
+                (f"This is a meeting about {meeting_description}. " if meeting_description else "") +
+                f"Previously, you analyzed: '{previous_sentiment}'. Now, please consider the overall tone of the discussion, the emotion conveyed by the language used, and the context in which words and phrases are used. Indicate whether the sentiment is generally positive, negative, or neutral, and provide brief explanations for your analysis where possible.")
 
         response = openai.ChatCompletion.create(
-            model="gpt-4",
-            temperature=0,
+            model=model,
+            temperature=temperature,
             messages=[
                 {
                     "role": "system",
@@ -392,8 +416,8 @@ def chunked_sentiment_analysis(transcription, meeting_description=None):
 
     # Use GPT-4 to rephrase the final sentiment analysis into a more cohesive paragraph
     response = openai.ChatCompletion.create(
-        model="gpt-4",
-        temperature=0,
+        model=model,
+        temperature=temperature,
         messages=[
             {
                 "role": "system",
@@ -411,7 +435,9 @@ def chunked_sentiment_analysis(transcription, meeting_description=None):
     return final_sentiment
 
 
-def sentiment_analysis(transcription, meeting_description=None):
+def sentiment_analysis(transcription,
+                       meeting_description=None
+                       ):
     try:
         # Try the original method first
         return full_sentiment_analysis(transcription, meeting_description)
@@ -437,7 +463,9 @@ def sentiment_analysis(transcription, meeting_description=None):
 
 # ---------- Main Functions --------------------
 
-def save_as_docx(minutes, filename):
+def save_as_docx(minutes,
+                 filename
+                 ):
     doc = Document()
     for key, value in minutes.items():
         # Replace underscores with spaces and capitalize each word for the heading
@@ -449,7 +477,9 @@ def save_as_docx(minutes, filename):
     doc.save(filename)
 
 
-def meeting_minutes(transcription, meeting_description=None):
+def meeting_minutes(transcription,
+                    meeting_description=None
+                    ):
     abstract_summary = abstract_summary_extraction(transcription, meeting_description)
     key_points = key_points_extraction(transcription, meeting_description)
     action_items = action_item_extraction(transcription, meeting_description)
@@ -472,7 +502,7 @@ if __name__ == '__main__':
         meeting_description = None
 
     transcription = transcribe_audio(audio_file_path)
-    print(transcription)  # TODO: not necessary
+    print(transcription)
 
     minutes = meeting_minutes(transcription, meeting_description)
     print(minutes)
