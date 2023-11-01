@@ -4,12 +4,15 @@ import openai
 from docx import Document
 import time
 from dotenv import load_dotenv
+import argparse
+from glob import glob
 
 load_dotenv()
 
 openai.api_key = os.getenv('OPENAI_API_KEY')
 model = "gpt-4"
 temperature = 0
+default_extension = 'm4a'
 
 
 # ---------- Transcription --------------------
@@ -492,19 +495,78 @@ def meeting_minutes(transcription,
     }
 
 
+def cli():
+    parser = argparse.ArgumentParser(prog="meeting-minutes.py", description="Generate meeting minutes from audio file")
+    parser.add_argument("input_dir",
+                        help="directory containing audio files.  Dir must be under 'audio' directory")
+    parser.add_argument("-e", "--extension",
+                        help="audio file extension",
+                        default=default_extension)
+    parser.add_argument("-r", "--review",
+                        help="review the transcription before generating meeting minutes",
+                        action="store_true")
+
+    args = parser.parse_args()
+
+    return {
+        'input_dir': args.input_dir,
+        'extension': args.extension,
+        'review': args.review,
+    }
+
+
 if __name__ == '__main__':
-    audio_file_path = "Audio/EarningsCall.mp3"
+    args = cli()
+
+    # audio file extension
+    if args['extension'].strip() == "":
+        args['extension'] = default_extension
+    extension = "*." + args['extension'].strip().replace('.', '')
+    print(f"extension: '{extension}'")
+
+    # input directory containing audio files
+    input_dir = args['input_dir']
+    if not os.path.exists(input_dir):
+        print(f"input_dir does not exist: '{input_dir}'")
+        exit(1)
+    print(f"input dir: '{input_dir}'")
+    print()
+
+    audio_files = glob(os.path.join(input_dir, extension))
+    print(f"found {len(audio_files)} audio files: {audio_files}")
+    print()
 
     # Ask the user for an optional meeting description
     meeting_description = input('Complete the sentence: "This is a meeting about..." (or press Enter to skip): ')
+    print()
     # If the user didn't provide a description, set meeting_description to None
     if meeting_description.strip() == "":
         meeting_description = None
 
-    transcription = transcribe_audio(audio_file_path)
-    print(transcription)
+    print("Transcribing audio files...")
+    full_transcription = ""
+    last_dir = os.path.basename(input_dir)
 
-    minutes = meeting_minutes(transcription, meeting_description)
-    print(minutes)
+    for audio_file in audio_files:
+        full_transcription += transcribe_audio(audio_file)
 
-    save_as_docx(minutes, 'Minutes/meeting_minutes.docx')
+    transcription_file = f"{input_dir}/{last_dir}_transcription.txt"
+    with open(transcription_file, 'w') as f:
+        f.write(full_transcription)
+
+    print(f"transcription files written to: '{transcription_file}'")
+    print()
+
+    if args['review']:
+        print("Review and edit transcription as needed.")
+        x = input("Press Enter to continue")
+        with open(transcription_file, 'r') as f:
+            full_transcription = f.read()
+        print()
+
+    print("Generating meeting minutes...")
+    summary_text = meeting_minutes(full_transcription, meeting_description)
+    summary_file = f"{input_dir}/{last_dir}_summary.docx"
+
+    save_as_docx(summary_text, summary_file)
+    print(f"Meeting summary written to: '{summary_file}'")

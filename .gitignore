@@ -1,7 +1,6 @@
 # Project exclude paths
 /venv/
-/Audio/projects/
-/Minutes/projects/
+/audio/
 /.idea/
 /.env
 **.docx

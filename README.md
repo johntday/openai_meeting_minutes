@@ -29,7 +29,26 @@ Edit file `.env` to include your `OPENAI_API_KEY`
 ## Usage
 
 ```bash
-python3 meeting-minutes.py
+# see command line options
+python3 meeting-minutes.py -h
+
+# typical usage
+python3 meeting-minutes.py 'audio/20231101_wp_demo' -e m4a
+```
+
+```bash
+extension: '*.m4a'
+input dir: 'audio/20231101_wp_demo'
+
+found 2 audio files: ['audio/20231101_wp_demo/New Recording 6.m4a', 'audio/20231101_wp_demo/New Recording 5.m4a']
+
+Complete the sentence: "This is a meeting about..." (or press Enter to skip): demo for hybris and aem after bug fixes
+Transcribing audio files...
+
+transcription files written to: 'audio/20231101_wp_demo/20231101_wp_demo_transcription.txt'
+Generating meeting minutes...
+
+Meeting summary written to: 'audio/20231101_wp_demo/20231101_wp_demo_summary.docx'
 ```
 
 
